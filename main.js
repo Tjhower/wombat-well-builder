@@ -1,60 +1,99 @@
-const camera = {
-  x: 0,
-  y: 0,
-};
-document.addEventListener("DOMContentLoaded", function () {
-  //Get canvas properly
+document.addEventListener("DOMContentLoaded", function() {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
-
   //Load Title
   let titleReady = false;
   const titleImage = new Image();
-
-  titleImage.onload = () => {
-    console.log("Image loaded!");
+  
+  /*titleImage.onload = () => {
+    console.log("Image Loaded!");
     titleReady = true;
   };
-
   titleImage.onerror = () => {
     console.error("Image failed to load!");
   };
   titleImage.src = "img/wombat-well-builder-title.svg";
 
   //Play Button Setup
-  let playButtonReady = false;
+  let playReady = false;
   const playButton = new Image();
+
   playButton.onload = () => {
-    console.log("Play button loaded!");
-    playButtonReady = true;
+    console.log("Play button image loaded!");
+    playReady = true;
   };
   playButton.onerror = () => {
-    console.error("Play button failed to load!");
+    console.error("Play button image failed to load!");
   };
-  playButton.src = "img/play-button.svg";
+  playButton.src = "img/play-button.svg";*/
+
+  const assets = new AssetLoader();
+  const player = new Player(assets);
+  assets.loadImage("title", "img/wombat-well-builder-title.svg");
+  assets.loadImage("play", "img/play-button.svg");
+
+  assets.loadImage("player_idle", "img/player-idle.png");
+  assets.loadImage("player_run", "img/player-run.png");
+  assets.loadImage("player_jump", "img/player-jump.png");
+  
+  assets.loadImage("bg_far", "img/bg-far.png");
+  assets.loadImage("bg_mid", "img/bg-mid.png");
+  assets.loadImage("bg_near", "img/bg-near.png");
+
+  //Start Game on Click
+  canvas.addEventListener("click", () => {
+    if (gameState === "title"){
+      setState("running");
+    }
+  });
+  // =========================
+  // INPUT
+  // =========================
+  document.body.addEventListener("keydown", (e) => {
+    if (gameState === "running") {
+      if (e.code === "Space") {
+        player.jump();
+      }
+    }
+  });
+
+  canvas.addEventListener("click", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    handleClick(mx, my);
+  });
+
+  // =========================
   // GAME LOOP
+  // =========================
   function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (gameState === "title") {
-      drawTitle();
+    player.update(); // allows idle animation
+    player.draw(ctx);
+    drawTitle(ctx, canvas);
     }
 
-    if (gameState === "map") {
-      updatePlayer();
-      updateCamera(player);
+    if (gameState === "running") {
+      player.update();
+      updateMap(player);
+
       drawMap(ctx, canvas);
-      drawPlayer(ctx, canvas);
+      player.draw(ctx);
     }
 
-    if (gameState === "minigame") {
-      drawMinigame();
+    if (gameState === "gameover") {
+      ctx.fillStyle = "black";
+      ctx.font = "60px monospace";
+      ctx.fillText("Game Over", canvas.width / 2 - 150, canvas.height / 2);
     }
 
     requestAnimationFrame(gameLoop);
   }
 
-  //Title Screen
   function drawTitle() {
     if (titleReady) {
       const imgRatio = titleImage.width / titleImage.height;
@@ -89,28 +128,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const x = (canvas.width - drawWidth) / 2;
     const y = (canvas.height - drawHeight) / 2 + 100; // Position below title
     ctx.drawImage(playButton, x, y, drawWidth, drawHeight);
-  }
-  // Set Game State
-  canvas.addEventListener("click", () => {
-    if (gameState === "title") {
-      setState("map"); // now uses state.js version
-    }
-  });
-  // Camera setup
-  function updateCamera(player) {
-    camera.x = player.x - canvas.width / 2;
-    camera.y = player.y - canvas.height / 2;
-
-    const maxX = MAP_COLS * tileSize - canvas.width;
-    const maxY = MAP_ROWS * tileSize - canvas.height;
-
-    camera.x = Math.max(0, Math.min(camera.x, maxX));
-    camera.y = Math.max(0, Math.min(camera.y, maxY));
-  }
-  function drawMinigame() {
-    ctx.fillStyle = "white";
-    ctx.font = "20px monospace";
-    ctx.fillText("Minigame Placeholder", 180, 220);
   }
 
   gameLoop();
