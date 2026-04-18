@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Wombat Well Builder</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body tabindex="0">
+    <!-- This allows the body to receive keyboard focus -->
+    <div id="game">
+      <canvas id="gameCanvas" width="1920" height="1080"></canvas>
+
+      <div id="ui">
+        <!--<p id="stateText">Title Screen</p>-->
+        <p id="stateText">Loading...</p>
+      </div>
+    </div>
+    <!--CORE ENGINE FILES (ORDER DEPENDENT => defer)-->
+    <script src="assets.js" defer></script>
+    <script src="map.js" defer></script>
+    <script src="player.js" defer></script>
+    <script src="state.js" defer></script>
+    <script src="main.js" defer></script>
+  </body>
+</html>
